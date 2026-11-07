@@ -19,7 +19,7 @@ SkillSpector is part of the [NVIDIA Verified Skills pipeline](https://docs.nvidi
 - **[Development guide](docs/DEVELOPMENT.md)** — Architecture, package layout, and how to extend the analyzer pipeline.
 - **[Security policy](SECURITY.md)** — Report suspected vulnerabilities privately to NVIDIA PSIRT.
 - **[Analysis resource bounds](docs/ANALYSIS_RESOURCE_BOUNDS.md)** — Fail-closed bundle, parser, nested-artifact, ledger, and finding ceilings.
-- **[Agent skills](docs/AGENT_SKILLS.md)** — Install the `skillspector` and `skill-inspector` agent skills for Claude Code, Codex CLI, and other `SKILL.md`-based agents.
+- **[Agent skills](docs/AGENT_SKILLS.md)** — Where agent skills are installed, how to install every skill through a SkillSpector scan, and the bundled `skillspector` and `skill-inspector` skills.
 - **[Pi extension](docs/PI_EXTENSION.md)** — Install SkillSpector as a Pi tool for scanning skills from inside agent sessions.
 - **[OpenCode extension](docs/OPENCODE_EXTENSION.md)** — Install SkillSpector as an OpenCode tool and `/skillspector` command for scanning skills from inside agent sessions.
 

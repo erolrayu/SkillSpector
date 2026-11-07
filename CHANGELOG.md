@@ -1,6 +1,6 @@
 ### 2.12.0 (Unreleased)
 ### Features/Bug Fixes
-* feat(skills): add a `skillspector` agent skill for running the CLI from Claude Code, Codex CLI, and other SKILL.md-based agents, with install docs in docs/AGENT_SKILLS.md
+* feat(skills): add a `skillspector` agent skill for running the CLI from Claude Code, Codex CLI, and other SKILL.md-based agents, with install docs in docs/AGENT_SKILLS.md, plus `scripts/install-skill.sh` (scan-gated skill installs) and `scripts/audit-installed-skills.sh` (re-scan installed skills)
 * fix(coverage): account for successfully inspected linked ZIP containers while retaining member failures and archive limits
 * fix(static): stop Markdown code fence lines from reading as an open quote that merges consecutive shell lines into one marker directive (#868)
 * fix(ra1): treat a prohibition on recommending a self-update ("Do not recommend self-update") as the prohibition it is, not as an RA1 self-modification instruction (#928)

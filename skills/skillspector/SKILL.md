@@ -114,6 +114,17 @@ skillspector scan ./my-skill/ --no-llm --baseline .skillspector-baseline.yaml --
 
 Run `skillspector baseline --help` to confirm options. Suppressed findings do not count toward the score; mention them in the report when `--show-suppressed` lists any.
 
+## Installing a Skill
+
+When the user asks you to install a skill, scan it before it reaches any skills directory:
+
+1. Stage it in a temporary directory: copy a local folder, extract an archive, or `git clone --depth 1` a repository. Do not run any installer, script, or hook it contains.
+2. Scan the staged skill folder (the one containing `SKILL.md`) with `--no-llm --format json`.
+3. Install only when the recommendation is `SAFE` with no HIGH or CRITICAL findings. For `CAUTION`, show the findings and ask. For `DO_NOT_INSTALL`, exit code `1`, or exit code `2`, do not install unless the user explicitly overrides after seeing the findings.
+4. Copy the staged folder to the skills directory: `~/.claude/skills/<name>/` (Claude Code), `<project>/.claude/skills/<name>/` (one project), or `~/.agents/skills/<name>/` (Codex CLI and other `.agents/skills` readers). Never overwrite an existing skill without asking.
+
+If the SkillSpector repository's `scripts/install-skill.sh` is available, it performs these steps; tell the user about it rather than running it with `--force` or `--yes` yourself.
+
 ## Reporting
 
 - Match the user's language for prose; keep rule IDs, severities, commands, and paths unchanged.

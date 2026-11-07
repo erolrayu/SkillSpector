@@ -20,27 +20,73 @@ Install the CLI so the agent can call it:
 uv tool install git+https://github.com/NVIDIA/skillspector.git
 ```
 
-## Install the skills
+## Where skills are installed
 
-Copy (or symlink) the skill folders into the directory your agent reads skills
-from. From a clone of this repository:
+| Agent | Personal (all projects) | One project only |
+|---|---|---|
+| Claude Code | `~/.claude/skills/<name>/SKILL.md` | `<project>/.claude/skills/<name>/SKILL.md` |
+| Codex CLI and other `.agents/skills` readers | `~/.agents/skills/<name>/SKILL.md` | `<project>/.agents/skills/<name>/SKILL.md` |
 
-**Claude Code** (personal, all projects):
+Each skill is a folder that contains a `SKILL.md` at its top level. For other
+agents, use the skills directory that tool documents. Restart the agent session
+after installing so it picks up new skills.
+
+## Install every skill through a SkillSpector scan
+
+[`scripts/install-skill.sh`](../scripts/install-skill.sh) copies, clones, or
+extracts a skill into a temporary staging directory, scans exactly those files
+with `skillspector scan --no-llm`, and installs the skill only when the scan
+passes. Nothing from the skill is executed.
 
 ```bash
-mkdir -p ~/.claude/skills && cp -R skills/skillspector skills/skill-inspector ~/.claude/skills/
+# Local folder, SKILL.md, or zip archive -> ~/.claude/skills/<name>
+scripts/install-skill.sh ./downloads/some-skill
+scripts/install-skill.sh ./some-skill.zip
+
+# Git repository; use --path when the repository holds several skills
+scripts/install-skill.sh --path skills/skill-inspector https://github.com/NVIDIA/skillspector.git
+
+# Install for Codex CLI, or into the current project's .claude/skills
+scripts/install-skill.sh --agent agents ./downloads/some-skill
+scripts/install-skill.sh --agent project ./downloads/some-skill
 ```
 
-**Claude Code** (one project only): copy into `<project>/.claude/skills/` instead.
-
-**Codex CLI and other tools that read `.agents/skills`**:
+Install the skills bundled in this repository the same way:
 
 ```bash
-mkdir -p ~/.agents/skills && cp -R skills/skillspector skills/skill-inspector ~/.agents/skills/
+scripts/install-skill.sh skills/skillspector
+scripts/install-skill.sh skills/skill-inspector
 ```
 
-For other agents, use the skills directory documented by that tool. Restart the
-agent session after installing so it picks up the new skills.
+Decision rules:
+
+| Scan result | What happens |
+|---|---|
+| `SAFE` and no HIGH/CRITICAL finding | Installed. |
+| `CAUTION`, or `SAFE` with a HIGH/CRITICAL finding | You are asked `[y/N]` (`--yes` accepts). |
+| `DO_NOT_INSTALL`, risk score > 50, or a `--strict` gate fails | Blocked (exit 1). `--force` installs only after you type `install`. |
+| Scan error | Not installed (exit 2). |
+
+Other options: `--strict` (also fail on any finding and on incomplete
+coverage), `--replace` (replace an installed skill; the old copy is moved to
+`~/.skillspector/backups/`), `--name NAME`, and `--llm` (add LLM analysis with
+your `SKILLSPECTOR_PROVIDER` settings). JSON reports are kept in
+`~/.skillspector/reports/` (override with `SKILLSPECTOR_REPORT_DIR`).
+
+## Re-scan installed skills
+
+Skills installed some other way (by hand, by an agent, or before you adopted
+the install script) are not scanned automatically. Audit them regularly, and
+after every SkillSpector update, with
+[`scripts/audit-installed-skills.sh`](../scripts/audit-installed-skills.sh):
+
+```bash
+scripts/audit-installed-skills.sh                       # ~/.claude/skills, ~/.agents/skills, ./.claude/skills
+scripts/audit-installed-skills.sh /path/to/skills-dir   # any directory of skill folders
+```
+
+It prints one line per skill, marks risky ones with `!!`, saves JSON reports,
+and exits `1` when any skill fails the SkillSpector gate.
 
 ## Use
 
@@ -48,6 +94,8 @@ Ask the agent in natural language, for example:
 
 - "Scan `./downloads/some-skill` with SkillSpector and give me a JSON report."
 - "Is this skill safe to install? https://github.com/user/my-skill"
+- "Install this skill for me: https://github.com/user/my-skill" (the `skillspector`
+  skill scans it first and installs only after a passing scan or your approval)
 - "Add a SkillSpector gate to CI that fails on any finding."
 
 In Claude Code you can also invoke the skills directly with `/skillspector` or
